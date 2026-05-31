@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Система управления — Валентина</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #f5f7fa;
+      color: #2d3748;
+      line-height: 1.6;
+    }
+
+    header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 48px 24px 36px;
+      text-align: center;
+    }
+
+    header h1 { font-size: 2rem; font-weight: 700; margin-bottom: 6px; }
+    header p { opacity: 0.85; font-size: 1rem; }
+
+    nav {
+      background: white;
+      border-bottom: 1px solid #e2e8f0;
+      padding: 0 24px;
+      display: flex;
+      gap: 0;
+      overflow-x: auto;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    nav a {
+      display: inline-block;
+      padding: 14px 18px;
+      color: #718096;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 500;
+      border-bottom: 3px solid transparent;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+
+    nav a:hover, nav a.active {
+      color: #667eea;
+      border-bottom-color: #667eea;
+    }
+
+    main {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 32px 16px;
+    }
+
+    section { display: none; }
+    section.active { display: block; }
+
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+      border: 1px solid #e2e8f0;
+    }
+
+    .card h2 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 16px;
+      color: #2d3748;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card h3 {
+      font-size: 0.95rem;
+      font-weight: 600;
+      margin: 16px 0 10px;
+      color: #4a5568;
+    }
+
+    .checklist { list-style: none; }
+    .checklist li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 7px 0;
+      border-bottom: 1px solid #f7fafc;
+      font-size: 0.9rem;
+      cursor: pointer;
+      user-select: none;
+    }
+    .checklist li:last-child { border-bottom: none; }
+
+    .checklist li .check {
+      width: 18px;
+      height: 18px;
+      border: 2px solid #cbd5e0;
+      border-radius: 4px;
+      flex-shrink: 0;
+      margin-top: 2px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s;
+    }
+
+    .checklist li.done .check {
+      background: #667eea;
+      border-color: #667eea;
+    }
+    .checklist li.done .check::after {
+      content: "✓";
+      color: white;
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .checklist li.done span { color: #a0aec0; text-decoration: line-through; }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      margin-left: 8px;
+    }
+    .badge.red { background: #fff5f5; color: #c53030; }
+    .badge.blue { background: #ebf8ff; color: #2b6cb0; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+    th {
+      background: #f7fafc;
+      padding: 10px 12px;
+      text-align: left;
+      font-weight: 600;
+      color: #4a5568;
+      border-bottom: 2px solid #e2e8f0;
+    }
+    td {
+      padding: 10px 12px;
+      border-bottom: 1px solid #f0f4f8;
+      color: #4a5568;
+    }
+    tr:last-child td { border-bottom: none; }
+    td strong { color: #2d3748; }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    @media (max-width: 600px) { .grid-2 { grid-template-columns: 1fr; } }
+
+    .profile-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+      margin-top: 4px;
+    }
+    .profile-item {
+      background: #f7fafc;
+      border-radius: 8px;
+      padding: 12px 14px;
+    }
+    .profile-item .label {
+      font-size: 0.75rem;
+      color: #718096;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 4px;
+    }
+    .profile-item .value {
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: #2d3748;
+    }
+
+    .post-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 12px;
+    }
+    .post-card {
+      background: #f7fafc;
+      border-radius: 8px;
+      padding: 14px;
+      border-left: 3px solid #667eea;
+    }
+    .post-card .week {
+      font-size: 0.75rem;
+      color: #718096;
+      margin-bottom: 6px;
+    }
+    .post-card p {
+      font-size: 0.85rem;
+      color: #4a5568;
+      margin-bottom: 4px;
+    }
+
+    .reset-btn {
+      background: none;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      padding: 4px 10px;
+      font-size: 0.75rem;
+      color: #718096;
+      cursor: pointer;
+      margin-left: auto;
+      display: block;
+      margin-bottom: 12px;
+    }
+    .reset-btn:hover { border-color: #667eea; color: #667eea; }
+
+    .progress-bar {
+      height: 4px;
+      background: #e2e8f0;
+      border-radius: 2px;
+      margin-bottom: 16px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #667eea, #764ba2);
+      border-radius: 2px;
+      transition: width 0.3s;
+    }
+
+    footer {
+      text-align: center;
+      padding: 32px 16px;
+      color: #a0aec0;
+      font-size: 0.8rem;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>🏥 Система управления — Валентина</h1>
+  <p>Врач-офтальмолог · Руководитель клиники · 2026</p>
+</header>
+
+<nav>
+  <a href="#" class="active" data-tab="profile">👤 Профиль</a>
+  <a href="#" data-tab="daily">☀️ Ежедневно</a>
+  <a href="#" data-tab="weekly">📆 Еженедельно</a>
+  <a href="#" data-tab="monthly">🗓 Ежемесячно</a>
+  <a href="#" data-tab="admin">✅ Администраторы</a>
+  <a href="#" data-tab="content">📱 Контент</a>
+  <a href="#" data-tab="family">👨‍👩‍👧‍👦 Семья</a>
+  <a href="#" data-tab="health">💊 Здоровье</a>
+</nav>
+
+<main>
+
+  <!-- ПРОФИЛЬ -->
+  <section id="profile" class="active">
+    <div class="card">
+      <h2>👤 Профиль</h2>
+      <div class="profile-grid">
+        <div class="profile-item"><div class="label">Роли</div><div class="value">Врач-офтальмолог, руководитель клиники, жена, мама, блогер</div></div>
+        <div class="profile-item"><div class="label">Дети</div><div class="value">Виктор (19 лет) · Ева (13 лет, 7 класс)</div></div>
+        <div class="profile-item"><div class="label">Питомцы</div><div class="value">🐕 Хаммер — шпиц, 3,5 года · 🐈 Галатея — бенгальская кошка, 1,5 года</div></div>
+        <div class="profile-item"><div class="label">Здоровье</div><div class="value">Гипертония, регулярные препараты, пилатес Пн/Ср/Пт</div></div>
+        <div class="profile-item"><div class="label">Персонал клиники</div><div class="value">5 врачей, 2 медсестры, 3 администратора, санитарка, анестезиолог, операционная медсестра</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>🤝 Команды для Claude</h2>
+      <table>
+        <tr><th>Команда</th><th>Что получишь</th></tr>
+        <tr><td><strong>утренний чек</strong></td><td>Список задач на день</td></tr>
+        <tr><td><strong>итог дня</strong></td><td>Шаблон для фиксации результатов</td></tr>
+        <tr><td><strong>контент</strong></td><td>Идеи или готовый текст для поста / рилса</td></tr>
+        <tr><td><strong>финансы</strong></td><td>Помощь с категоризацией расходов</td></tr>
+        <tr><td><strong>Виктор</strong></td><td>Темы и идеи для разговора</td></tr>
+        <tr><td><strong>Ева</strong></td><td>Напоминания по расписанию</td></tr>
+        <tr><td><strong>склад</strong></td><td>Шаблон учёта расходников</td></tr>
+        <tr><td><strong>чек-лист</strong></td><td>Нужный чек-лист по запросу</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <!-- ЕЖЕДНЕВНО -->
+  <section id="daily">
+    <div class="card">
+      <h2>🌅 Утро — 08:30–08:45 (брифинг с администратором)</h2>
+      <button class="reset-btn" onclick="resetSection('morning')">Сбросить</button>
+      <div class="progress-bar"><div class="progress-fill" id="morning-bar" style="width:0%"></div></div>
+      <ul class="checklist" id="morning">
+        <li onclick="toggle(this)"><div class="check"></div><span>Сколько пациентов записано на день</span></li>
+        <li onclick="toggle(this)"><div class="check"></div><span>Все ли врачи на месте, нет ли больничных</span></li>
+        <li onclick="toggle(this)"><div class="check"></div><span>Срочные вопросы от пациентов с вечера</span></li>
+        <li onclick="toggle(this)"><div class="check"></div><span>Готовность операционной к работе</span></li>
+        <li onclick="toggle(this)"><div class="check"></div><span>Приняла препараты от давления / измерила давление</span></li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2>🔆 В течение дня</h2>
+      <button class="reset-btn" onclick="resetSection('daytime')">Сбросить</button>
+      <div class="progress-bar"><div class="progress-fill" id="daytime-bar" style="width:0%"></div></div>
+      <ul class="checklist" id="daytime">
+        <li onclick="toggle(this)"><div class="check"></div><span>1–2 раза взглянуть на зону ресепшн — как работают администраторы</span></li>
+        <li onclick="toggle(this)"><div class="check"></div><span>Все рабочие расходы — только через рабочий счёт</span></li>
+        <li onclick="toggle(this)"><div class="check"></div><span>Конверсия звонков — зафиксированы ли все записи</span></li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2>🌙 Вечер — итог 5 минут</h2>
+      <button class="reset-btn" onclick="resetSection('evening')">Сбросить</button>
+      <div class="progress-bar"><div class="progress-fill" id="evening-bar" style="width:0%"></div></div>
+      <ul class="checklist" id="evening">
+        <li onclick="toggle(this)"><div class="check"></div><span>Выручка за день — факт vs план</span></li>
+        <li onclick="toggle(this)"><div class="check"></div><span>Что нужно решить завтра — 1–3 задачи</span></li>
+        <li onclick="toggle(this)"><div class="check"></div><span>Принять вечерние препараты / измерить давление</span></li>
+        <li onclick="toggle(this)"><div class="check"></div><span>Зафиксировать траты дня (личные / рабочие — раздельно)</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ЕЖЕНЕДЕЛЬНО -->
+  <section id="weekly">
+    <div class="card">
+      <h2>📆 Задачи по дням недели</h2>
+      <table>
+        <tr><th>День</th><th>Задача</th><th>Что проверяем</th></tr>
+        <tr><td><strong>Понедельник</strong></td><td>Пятиминутка с командой</td><td>Задачи на неделю, проблемы, расписание</td></tr>
+        <tr><td><strong>Вторник</strong></td><td>Анализ продаж и выручки</td><td>Факт vs план, первичные/повторные, конверсия</td></tr>
+        <tr><td><strong>Среда</strong></td><td>Контроль администраторов</td><td>Чек-листы выполнены, жалобы/похвалы</td></tr>
+        <tr><td><strong>Четверг</strong></td><td>Склад и расходники</td><td>Критичные остатки, что заказать, сроки годности</td></tr>
+        <tr><td><strong>Пятница</strong></td><td>Итог недели + план на следующую</td><td>Выручка, невыполненные задачи, кадровые вопросы</td></tr>
+        <tr><td><strong>Воскресенье</strong></td><td>Семейный блок</td><td>Дети, расписание, питомцы, список покупок</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <!-- ЕЖЕМЕСЯЧНО -->
+  <section id="monthly">
+    <div class="card">
+      <h2>📊 1–3 число — Финансовый отчёт <span class="badge red">⚠️ критично</span></h2>
+      <button class="reset-btn" onclick="resetSection('fin')">Сбросить</button>
+      <div class="progress-bar"><div class="progress-fill" id="fin-bar" style="width:0%"></div></div>
+      <ul class="checklist" id="fin">
+        <li onclick="toggle(this)"><div class="check"></div><span>Выручка за месяц — факт vs план</span></li>
+        <li onclick="toggle(this)"><div class="check"></div><span>Расходы по категориям (рабочие / личные — строго раздельно)</span></li>
+        <li onclick="toggle(this)"><div class="check"></div><span>Зарплата и премии сотрудников</span></li>
+        <li onclick="toggle(this)"><div class="check"></div><span>Операционная подушка — остаток на счёте</span></li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2>🗄 15–17 число — Инвентаризация склада</h2>
+      <button class="reset-btn" onclick="resetSection('stock')">Сбросить</button>
+      <div class="progress-bar"><div class="progress-fill" id="stock-bar" style="width:0%"></div></div>
+      <ul class="checklist" id="stock">
+        <li onclick="toggle(this)"><div class="check"></div><span>Пересчёт расходников и медикаментов</span></li>
+        <li onclick="toggle(this)"><div class="check"></div><span>Сверка факта с учётной системой</span></li>
+        <li onclick="toggle(this)"><div class="check"></div><span>Списание просроченных и испорченных позиций</span></li>
+        <li onclick="toggle(this)"><div class="check"></div><span>Формирование заявки на следующий месяц</span></li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2>👥 Последняя неделя — Оценка персонала</h2>
+      <button class="reset-btn" onclick="resetSection('staff')">Сбросить</button>
+      <div class="progress-bar"><div class="progress-fill" id="staff-bar" style="width:0%"></div></div>
+      <ul class="checklist" id="staff">
+        <li onclick="toggle(this)"><div class="check"></div><span>Выполнение плана каждым врачом <strong>⚠️ критично</strong></span></li>
+        <li onclick="toggle(this)"><div class="check"></div><span>Качество работы администраторов — жалобы / похвалы</span></li>
+        <li onclick="toggle(this)"><div class="check"></div><span>Нарушения и опоздания — зафиксированы ли</span></li>
+        <li onclick="toggle(this)"><div class="check"></div><span>Кто нуждается в обучении или поддержке</span></li>
+        <li onclick="toggle(this)"><div class="check"></div><span>Кого стоит отметить и поощрить</span></li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2>🎯 25–28 число — План на следующий месяц</h2>
+      <button class="reset-btn" onclick="resetSection('plan')">Сбросить</button>
+      <div class="progress-bar"><div class="progress-fill" id="plan-bar" style="width:0%"></div></div>
+      <ul class="checklist" id="plan">
+        <li onclick="toggle(this)"><div class="check"></div><span>Цель по выручке — реалистичная цифра</span></li>
+        <li onclick="toggle(this)"><div class="check"></div><span>Фокус-услуги месяца (что продвигаем активнее)</span></li>
+        <li onclick="toggle(this)"><div class="check"></div><span>Контент-план инстаграма — тема месяца</span></li>
+        <li onclick="toggle(this)"><div class="check"></div><span>Обучение персонала — что запланировано</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- АДМИНИСТРАТОРЫ -->
+  <section id="admin">
+    <div class="card">
+      <h2>🌅 Открытие клиники</h2>
+      <button class="reset-btn" onclick="resetSection('open')">Сбросить</button>
+      <div class="progress-bar"><div class="progress-fill" id="open-bar" style="width:0%"></div></div>
+      <ul class="checklist" id="open">
+        <li onclick="toggle(this)"><div class="check"></div><span>Проверка чистоты зоны ресепшн и холла</span></li>
+        <li onclick="toggle(this)"><div class="check"></div><span>Проверка расписания на день — нет ли накладок</span></li>
+        <li onclick="toggle(this)"><div class="check"></div><span>Подтверждение записей пациентов (звонок / смс)</span></li>
+        <li onclick="toggle(this)"><div class="check"></div><span>Наличие бланков и документов на стойке</span></li>
+        <li onclick="toggle(this)"><div class="check"></div><span>Кассовый аппарат готов к работе</span></li>
+        <li onclick="toggle(this)"><div class="check"></div><span>Все сотрудники пришли — отметить в журнале</span></li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2>🔆 В течение дня</h2>
+      <button class="reset-btn" onclick="resetSection('admday')">Сбросить</button>
+      <div class="progress-bar"><div class="progress-fill" id="admday-bar" style="width:0%"></div></div>
+      <ul class="checklist" id="admday">
+        <li onclick="toggle(this)"><div class="check"></div><span>Встреча каждого пациента — приветствие, регистрация, направление к врачу</span></li>
+        <li onclick="toggle(this)"><div class="check"></div><span>Ведение записей в CRM без пропусков</span></li>
+        <li onclick="toggle(this)"><div class="check"></div><span>Контроль очереди — ожидание >10 минут = предупредить пациента</span></li>
+        <li onclick="toggle(this)"><div class="check"></div><span>Все входящие звонки — принять, зафиксировать</span></li>
+        <li onclick="toggle(this)"><div class="check"></div><span>Конверсия звонка в запись — предлагать ближайшее окно</span></li>
+        <li onclick="toggle(this)"><div class="check"></div><span>При жалобе пациента — немедленно сообщить руководителю</span></li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2>🌙 Конец рабочего дня</h2>
+      <button class="reset-btn" onclick="resetSection('close')">Сбросить</button>
+      <div class="progress-bar"><div class="progress-fill" id="close-bar" style="width:0%"></div></div>
+      <ul class="checklist" id="close">
+        <li onclick="toggle(this)"><div class="check"></div><span>Подтверждение записей на завтра — обзвон или смс</span></li>
+        <li onclick="toggle(this)"><div class="check"></div><span>Отчёт по звонкам: входящих / записали / отказали</span></li>
+        <li onclick="toggle(this)"><div class="check"></div><span>Касса закрыта, Z-отчёт снят и передан</span></li>
+        <li onclick="toggle(this)"><div class="check"></div><span>Журнал полностью заполнен, ни одного пропуска</span></li>
+        <li onclick="toggle(this)"><div class="check"></div><span>Рабочее место приведено в порядок</span></li>
+        <li onclick="toggle(this)"><div class="check"></div><span>Передача информации о нестандартных ситуациях руководителю</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- КОНТЕНТ -->
+  <section id="content">
+    <div class="card">
+      <h2>📱 Контент-план Instagram — июнь 2026</h2>
+      <p style="font-size:0.85rem;color:#718096;margin-bottom:16px;">3 поста в неделю + сторис ежедневно</p>
+      <table style="margin-bottom:16px">
+        <tr><th>Рубрика</th><th>Доля</th><th>Форматы</th></tr>
+        <tr><td>👁 Эксперт</td><td>50%</td><td>Мифы, разборы, симптомы, профилактика</td></tr>
+        <tr><td>👩‍⚕️ За кулисами</td><td>20%</td><td>День врача, клиника изнутри, команда</td></tr>
+        <tr><td>🎓 Обучение</td><td>15%</td><td>Советы для врачей, мастер-классы</td></tr>
+        <tr><td>🌱 Личное</td><td>15%</td><td>Мама, спорт, баланс — в сторис</td></tr>
+      </table>
+    </div>
+
+    <div class="card">
+      <h2>📅 Постовой план</h2>
+      <div class="post-grid">
+        <div class="post-card"><div class="week">2–8 июня</div><p>👁 5 признаков, что пора к офтальмологу</p><p>🎬 За кулисами: утро в клинике</p><p>💡 Миф: морковь восстанавливает зрение?</p></div>
+        <div class="post-card"><div class="week">9–15 июня</div><p>👁 Как выбрать солнцезащитные очки</p><p>❤️ История пациента (без имён)</p><p>👨‍👩‍👧 Гаджеты и глаза детей</p></div>
+        <div class="post-card"><div class="week">16–22 июня</div><p>👁 Операция на глаза — страшно ли это?</p><p>🎬 Знакомство с командой</p><p>🌱 Личное: как совмещаю работу и семью</p></div>
+        <div class="post-card"><div class="week">23–30 июня</div><p>❓ Топ-вопросов от пациентов</p><p>🎓 Анонс обучения для врачей</p><p>📊 Итог июня — что было, что впереди</p></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>🎬 Рилс — минимум 2 в месяц</h2>
+      <button class="reset-btn" onclick="resetSection('reels')">Сбросить</button>
+      <div class="progress-bar"><div class="progress-fill" id="reels-bar" style="width:0%"></div></div>
+      <ul class="checklist" id="reels">
+        <li onclick="toggle(this)"><div class="check"></div><span>Один день врача-офтальмолога — сторителлинг, монтаж из коротких клипов</span></li>
+        <li onclick="toggle(this)"><div class="check"></div><span>Проверь своё зрение за 30 секунд — интерактивный тест</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- СЕМЬЯ -->
+  <section id="family">
+    <div class="card">
+      <h2>👧 Ева (13 лет, 7 класс)</h2>
+      <table>
+        <tr><th>День</th><th>Время</th><th>Занятие</th></tr>
+        <tr><td>Пн, Ср, Пт</td><td>10:00–12:00</td><td>Английский + математика (репетиторы)</td></tr>
+        <tr><td>Вт, Чт</td><td>09:00–10:00</td><td>Плавание</td></tr>
+      </table>
+      <p style="font-size:0.8rem;color:#e53e3e;margin-top:12px;">⚠️ При пропуске плавания — напомнить об отработке</p>
+    </div>
+
+    <div class="card">
+      <h2>🎓 Виктор (19 лет) — Малайзия</h2>
+      <p style="font-size:0.85rem;color:#48bb78;margin-bottom:12px;">✅ IELTS сдан</p>
+      <h3>Зона внимания</h3>
+      <ul style="font-size:0.875rem;color:#4a5568;padding-left:20px;margin-bottom:12px;">
+        <li>Дисциплина и режим сна</li>
+        <li>Мотивация к учёбе</li>
+      </ul>
+      <h3>Темы для разговора</h3>
+      <ul style="font-size:0.875rem;color:#4a5568;padding-left:20px;">
+        <li>Жизнь студентов в Малайзии — что его ждёт</li>
+        <li>Финансовая независимость — как планировать бюджет</li>
+        <li>Что он хочет делать через 5 лет — мечты без давления</li>
+        <li>Спросить его мнение о чём-то важном — дать почувствовать себя взрослым</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2>🐾 Питомцы</h2>
+      <div class="grid-2">
+        <div>
+          <h3>🐕 Хаммер (шпиц, 3,5 года)</h3>
+          <ul style="font-size:0.875rem;color:#4a5568;padding-left:20px;">
+            <li>Ежегодные прививки</li>
+            <li>Обработка от блох и клещей — раз в 3 месяца</li>
+          </ul>
+        </div>
+        <div>
+          <h3>🐈 Галатея (бенгальская, 1,5 года)</h3>
+          <ul style="font-size:0.875rem;color:#4a5568;padding-left:20px;">
+            <li>Ежегодные прививки</li>
+            <li>Обработка от паразитов — раз в 3 месяца</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ЗДОРОВЬЕ -->
+  <section id="health">
+    <div class="card">
+      <h2>💊 Личный контроль здоровья</h2>
+      <button class="reset-btn" onclick="resetSection('health-list')">Сбросить</button>
+      <div class="progress-bar"><div class="progress-fill" id="health-list-bar" style="width:0%"></div></div>
+      <ul class="checklist" id="health-list">
+        <li onclick="toggle(this)"><div class="check"></div><span>Принять препараты утром</span></li>
+        <li onclick="toggle(this)"><div class="check"></div><span>Измерить давление утром (до нагрузки)</span></li>
+        <li onclick="toggle(this)"><div class="check"></div><span>Измерить давление вечером</span></li>
+        <li onclick="toggle(this)"><div class="check"></div><span>Принять вечерние препараты</span></li>
+        <li onclick="toggle(this)"><div class="check"></div><span>Запас препаратов — если осталось менее 7 дней → заказать</span></li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2>🤸 Пилатес</h2>
+      <table>
+        <tr><th>День</th><th>Время</th></tr>
+        <tr><td>Понедельник</td><td>07:00–08:00</td></tr>
+        <tr><td>Среда</td><td>07:00–08:00</td></tr>
+        <tr><td>Пятница</td><td>07:00–08:00</td></tr>
+      </table>
+    </div>
+
+    <div class="card">
+      <h2>🏥 Плановые визиты</h2>
+      <ul style="font-size:0.875rem;color:#4a5568;padding-left:20px;">
+        <li>Кардиолог — раз в квартал</li>
+        <li>Реабилитолог — подготовка к бегу (регулярно)</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2>💰 Правила разделения финансов</h2>
+      <p style="font-size:0.85rem;color:#c53030;font-weight:600;margin-bottom:12px;">Главное правило: всё, что связано с клиникой — только через рабочий счёт. Никогда через личную карту.</p>
+      <div class="grid-2">
+        <div>
+          <h3>Личные расходы</h3>
+          <ul style="font-size:0.8rem;color:#4a5568;padding-left:16px;margin-top:8px;">
+            <li>Продукты и еда</li>
+            <li>Дети (кружки, одежда, школа)</li>
+            <li>Питомцы</li>
+            <li>Здоровье и спорт</li>
+            <li>Дом и коммунальные</li>
+          </ul>
+        </div>
+        <div>
+          <h3>Рабочие расходы</h3>
+          <ul style="font-size:0.8rem;color:#4a5568;padding-left:16px;margin-top:8px;">
+            <li>Зарплата персонала</li>
+            <li>Медицинские расходники</li>
+            <li>Оборудование</li>
+            <li>Аренда клиники</li>
+            <li>Маркетинг и реклама</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>Система управления — Валентина · 2026 · Создано с Claude (Anthropic)</footer>
+
+<script>
+  // Tab navigation
+  document.querySelectorAll('nav a').forEach(link => {
+    link.addEventListener('click', e => {
+      e.preventDefault();
+      const tab = link.dataset.tab;
+      document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
+      document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
+      link.classList.add('active');
+      document.getElementById(tab).classList.add('active');
+    });
+  });
+
+  // Checklist toggle with localStorage
+  function toggle(li) {
+    li.classList.toggle('done');
+    saveState();
+    updateBars();
+  }
+
+  function resetSection(id) {
+    document.querySelectorAll('#' + id + ' li').forEach(li => li.classList.remove('done'));
+    saveState();
+    updateBars();
+  }
+
+  function updateBars() {
+    document.querySelectorAll('.checklist').forEach(list => {
+      const id = list.id;
+      const total = list.querySelectorAll('li').length;
+      const done = list.querySelectorAll('li.done').length;
+      const bar = document.getElementById(id + '-bar');
+      if (bar) bar.style.width = (total ? Math.round(done/total*100) : 0) + '%';
+    });
+  }
+
+  function saveState() {
+    const state = {};
+    document.querySelectorAll('.checklist').forEach(list => {
+      state[list.id] = [];
+      list.querySelectorAll('li').forEach((li, i) => {
+        if (li.classList.contains('done')) state[list.id].push(i);
+      });
+    });
+    localStorage.setItem('valentina-checks', JSON.stringify(state));
+  }
+
+  function loadState() {
+    const raw = localStorage.getItem('valentina-checks');
+    if (!raw) return;
+    const state = JSON.parse(raw);
+    Object.entries(state).forEach(([id, indices]) => {
+      const list = document.getElementById(id);
+      if (!list) return;
+      const items = list.querySelectorAll('li');
+      indices.forEach(i => { if (items[i]) items[i].classList.add('done'); });
+    });
+    updateBars();
+  }
+
+  loadState();
+</script>
+</body>
+</html>
